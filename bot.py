@@ -1,28 +1,32 @@
 import os
 import telebot
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+import requests
+import urllib.parse
 
-# Бот берет токен из переменных окружения (безопасный способ)
 TOKEN = os.environ.get('BOT_TOKEN')
 bot = telebot.TeleBot(TOKEN)
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    markup = InlineKeyboardMarkup()
-    markup.add(InlineKeyboardButton("👤 Профиль", callback_data="profile"))
-    markup.add(InlineKeyboardButton("⚙️ Настройки", callback_data="settings"))
-    bot.send_message(message.chat.id, "Привет! Это главное меню:", reply_markup=markup)
-
-@bot.callback_query_handler(func=lambda call: True)
-def callback(call):
-    if call.data == "profile":
-        bot.edit_message_text("Это твой профиль.", call.message.chat.id, call.message.message_id)
-    elif call.data == "settings":
-        bot.edit_message_text("Тут будут настройки.", call.message.chat.id, call.message.message_id)
+    bot.send_message(message.chat.id, "Привет! Я ИИ-бот. Напиши мне любой вопрос, и я отвечу!")
 
 @bot.message_handler(func=lambda message: True)
-def echo_all(message):
-    bot.reply_to(message, "Я пока не знаю такой команды. Нажми /start")
+def ai_answer(message):
+    bot.send_chat_action(message.chat.id, 'typing')
+    try:
+        # Отправляем запрос в бесплатный API без ключей
+        prompt = urllib.parse.quote(message.text)
+        url = f"https://text.pollinations.ai/{prompt}"
+        
+        response = requests.get(url, timeout=30)
+        
+        if response.status_code == 200:
+            answer = response.text[:4000] # Обрезаем для лимита Телеграма
+            bot.reply_to(message, answer)
+        else:
+            bot.reply_to(message, "Ой, нейросеть перегружена. Попробуй еще раз!")
+    except Exception as e:
+        bot.reply_to(message, "Произошла ошибка. Попробуй позже.")
 
-print("Бот запущен...")
+print("ИИ-бот запущен...")
 bot.infinity_polling()
