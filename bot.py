@@ -53,7 +53,7 @@ def start(message):
 # Команды
 @bot.message_handler(commands=['links'])
 def links(message):
-    bot.reply_to(message, f"🔗 Вот наши ссылки:\nКанал: {CHANNEL_LINK}\nСвязь: {CONTACT_LINK}")
+    bot.reply_to(message, f"🔗 Вот наши ссылки:\nКанал: {https://t.me/teammrgreenbro}\nСвязь: {Пепедастр)
 
 @bot.message_handler(commands=['rules'])
 def rules(message):
